@@ -3,6 +3,8 @@ import Sidebar from "../components/Sidebar";
 import Products from "./Products";
 import Plans from "./Plans";
 import Subscriptions from "./Subscriptions";
+import Invoices from "./Invoices";
+import Payments from "./Payments";
 
 export default function Dashboard({ user, onLogout }) {
     const [active, setActive] = useState("Dashboard");
@@ -61,6 +63,10 @@ export default function Dashboard({ user, onLogout }) {
                     <Plans user={user} />
                 ) : active === "Subscriptions" ? (
                     <Subscriptions user={user} />
+                ) : active === "Invoices" ? (
+                    <Invoices user={user} />
+                ) : active === "Payments" ? (
+                    <Payments user={user} />
                 ) : (
                     <div className="welcome-card">
                         <h3>{active}</h3>

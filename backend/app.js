@@ -24,4 +24,8 @@ const planRoutes = require("./routes/planRoutes");
 app.use("/api/plans", planRoutes);
 const subscriptionRoutes = require("./routes/subscriptionRoutes");
 app.use("/api/subscriptions", subscriptionRoutes);
+const invoiceRoutes = require("./routes/invoiceRoutes");
+app.use("/api/invoices", invoiceRoutes);
+const paymentRoutes = require("./routes/paymentRoutes");
+app.use("/api/payments", paymentRoutes);
 module.exports = app;

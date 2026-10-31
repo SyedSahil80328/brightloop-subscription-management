@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { apiRequest } from "../services/api";
 
-export default function Login({ onLogin, onRegister }) {
+export default function Login({ onLogin, onRegister, onForgotPassword }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -43,7 +43,7 @@ export default function Login({ onLogin, onRegister }) {
                         type="email"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
-                        placeholder="admin@brightloop.com"
+                        placeholder="your@example.com"
                         required
                     />
 
@@ -55,6 +55,12 @@ export default function Login({ onLogin, onRegister }) {
                         placeholder="Enter your password"
                         required
                     />
+
+                    <div className="forgot-link">
+                        <button type="button" onClick={onForgotPassword}>
+                            Forgot Password?
+                        </button>
+                    </div>
 
                     {error && <p className="error">{error}</p>}
 
