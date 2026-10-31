@@ -20,4 +20,6 @@ const productRoutes = require("./routes/productRoutes");
 app.use("/api/products", productRoutes);
 const variantRoutes = require("./routes/variantRoutes");
 app.use("/api", variantRoutes);
+const planRoutes = require("./routes/planRoutes");
+app.use("/api/plans", planRoutes);
 module.exports = app;
