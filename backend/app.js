@@ -22,4 +22,6 @@ const variantRoutes = require("./routes/variantRoutes");
 app.use("/api", variantRoutes);
 const planRoutes = require("./routes/planRoutes");
 app.use("/api/plans", planRoutes);
+const subscriptionRoutes = require("./routes/subscriptionRoutes");
+app.use("/api/subscriptions", subscriptionRoutes);
 module.exports = app;

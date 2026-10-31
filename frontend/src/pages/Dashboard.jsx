@@ -2,6 +2,7 @@ import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Products from "./Products";
 import Plans from "./Plans";
+import Subscriptions from "./Subscriptions";
 
 export default function Dashboard({ user, onLogout }) {
     const [active, setActive] = useState("Dashboard");
@@ -58,6 +59,8 @@ export default function Dashboard({ user, onLogout }) {
                     <Products user={user} />
                 ) : active === "Plans" ? (
                     <Plans user={user} />
+                ) : active === "Subscriptions" ? (
+                    <Subscriptions user={user} />
                 ) : (
                     <div className="welcome-card">
                         <h3>{active}</h3>

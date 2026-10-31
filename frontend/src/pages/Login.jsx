@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { apiRequest } from "../services/api";
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, onRegister }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -61,6 +61,16 @@ export default function Login({ onLogin }) {
                     <button type="submit" disabled={loading}>
                         {loading ? "Signing in..." : "Sign in"}
                     </button>
+
+                    <div className="auth-switch">
+                        Don't have an account?{" "}
+                        <button
+                            type="button"
+                            onClick={onRegister}
+                        >
+                            Create Account
+                        </button>
+                    </div>
                 </form>
 
                 <p className="login-footer">
