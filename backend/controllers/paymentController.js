@@ -73,3 +73,38 @@ exports.recordPayment = async (req, res) => {
         client.release();
     }
 };
+
+exports.getPayments = async (req, res) => {
+    try {
+        let query = `
+            SELECT
+                p.id,
+                p.invoice_id,
+                p.payment_method,
+                p.amount,
+                p.payment_date,
+                p.note,
+                i.invoice_number,
+                u.name AS customer_name
+            FROM payments p
+            JOIN invoices i ON i.id = p.invoice_id
+            JOIN users u ON u.id = i.customer_id
+        `;
+
+        const values = [];
+
+        if (req.user.role === "customer") {
+            query += " WHERE i.customer_id = $1";
+            values.push(req.user.id);
+        }
+
+        query += " ORDER BY p.payment_date DESC";
+
+        const result = await pool.query(query, values);
+
+        res.json({ payments: result.rows });
+    } catch (error) {
+        console.error("Get payments error:", error);
+        res.status(500).json({ message: "Failed to fetch payments" });
+    }
+};

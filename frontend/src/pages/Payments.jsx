@@ -5,6 +5,7 @@ import { RefreshCw, CreditCard } from "lucide-react";
 
 export default function Payments({ user }) {
     const [invoices, setInvoices] = useState([]);
+    const [payments, setPayments] = useState([]);
     const [selectedInvoice, setSelectedInvoice] = useState("");
     const [amount, setAmount] = useState("");
     const [method, setMethod] = useState("UPI");
@@ -17,9 +18,14 @@ export default function Payments({ user }) {
 
     async function loadInvoices() {
         setLoading(true);
+        setError("");
+
         try {
             const data = await apiRequest("/invoices");
             setInvoices(data.invoices || []);
+
+            const paymentData = await apiRequest("/payments");
+            setPayments(paymentData.payments || []);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -59,6 +65,7 @@ export default function Payments({ user }) {
             setAmount("");
             setNote("");
             setSelectedInvoice("");
+
             await loadInvoices();
         } catch (err) {
             setError(err.message);
@@ -76,9 +83,16 @@ export default function Payments({ user }) {
             <div className="page-heading">
                 <div>
                     <h3>Payments</h3>
-                    <p className="muted">Record and manage invoice payments.</p>
+                    <p className="muted">
+                        Record and manage invoice payments.
+                    </p>
                 </div>
-                <button className="secondary-button" onClick={loadInvoices}>
+
+                <button
+                    className="secondary-button"
+                    onClick={loadInvoices}
+                    disabled={loading}
+                >
                     <RefreshCw size={16} /> Refresh
                 </button>
             </div>
@@ -102,13 +116,17 @@ export default function Payments({ user }) {
                                 required
                             >
                                 <option value="">Select invoice</option>
+
                                 {invoices
                                     .filter(i => i.status === "confirmed")
                                     .map(i => (
                                         <option key={i.id} value={i.id}>
-                                            {i.invoice_number} — {money(
-                                                Number(i.total_amount) - Number(i.amount_paid)
-                                            )} due
+                                            {i.invoice_number} — {
+                                                money(
+                                                    Number(i.total_amount) -
+                                                    Number(i.amount_paid)
+                                                )
+                                            } due
                                         </option>
                                     ))}
                             </select>
@@ -152,7 +170,8 @@ export default function Payments({ user }) {
 
                     {selected && (
                         <p className="muted" style={{ marginTop: 12 }}>
-                            Outstanding balance: <strong>{money(outstanding)}</strong>
+                            Outstanding balance:{" "}
+                            <strong>{money(outstanding)}</strong>
                         </p>
                     )}
 
@@ -160,8 +179,11 @@ export default function Payments({ user }) {
                         <button
                             className="primary-button"
                             type="submit"
-                            disabled={!selected || Number(amount) <= 0 ||
-                                Number(amount) > outstanding}
+                            disabled={
+                                !selected ||
+                                Number(amount) <= 0 ||
+                                Number(amount) > outstanding
+                            }
                         >
                             <CreditCard size={16} /> Record Payment
                         </button>
@@ -172,45 +194,62 @@ export default function Payments({ user }) {
             <div className="table-card">
                 <div className="table-heading">
                     <div>
-                        <h3>Payment Overview</h3>
-                        <p className="muted">Payment status across invoices</p>
+                        <h3>Transaction History</h3>
+                        <p className="muted">
+                            {payments.length} payments recorded
+                        </p>
                     </div>
+
                     <CreditCard size={22} color="#5145cd" />
                 </div>
 
                 {loading ? (
-                    <p className="empty-state">Loading payment records...</p>
+                    <p className="empty-state">
+                        Loading payments...
+                    </p>
+                ) : payments.length === 0 ? (
+                    <p className="empty-state">
+                        No payments recorded yet.
+                    </p>
                 ) : (
                     <div className="table-scroll">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Invoice</th>
-                                    <th>Total</th>
-                                    <th>Paid</th>
-                                    <th>Outstanding</th>
-                                    <th>Status</th>
+                                    {user?.role !== "customer" && (
+                                        <th>Customer</th>
+                                    )}
+                                    <th>Payment Method</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Note</th>
                                 </tr>
                             </thead>
+
                             <tbody>
-                                {invoices.map(i => (
-                                    <tr key={i.id}>
-                                        <td><strong>{i.invoice_number}</strong></td>
-                                        <td>{money(i.total_amount)}</td>
-                                        <td>{money(i.amount_paid)}</td>
-                                        <td>{money(Number(i.total_amount) - Number(i.amount_paid))}</td>
+                                {payments.map(payment => (
+                                    <tr key={payment.id}>
                                         <td>
-                                            <span className={`subscription-status ${i.status}`}>
-                                                {i.status}
-                                            </span>
+                                            <strong>
+                                                {payment.invoice_number}
+                                            </strong>
                                         </td>
+
+                                        {user?.role !== "customer" && (
+                                            <td>{payment.customer_name}</td>
+                                        )}
+
+                                        <td>{payment.payment_method}</td>
+                                        <td>{money(payment.amount)}</td>
+                                        <td>
+                                            {new Date(
+                                                payment.payment_date
+                                            ).toLocaleDateString("en-IN")}
+                                        </td>
+                                        <td>{payment.note || "—"}</td>
                                     </tr>
                                 ))}
-                                {invoices.length === 0 && (
-                                    <tr>
-                                        <td colSpan="5">No payment records available.</td>
-                                    </tr>
-                                )}
                             </tbody>
                         </table>
                     </div>
