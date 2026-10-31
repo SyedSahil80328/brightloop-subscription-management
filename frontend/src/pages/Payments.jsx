@@ -100,7 +100,7 @@ export default function Payments({ user }) {
             {message && <p className="success-message">{message}</p>}
             {error && <p className="error">{error}</p>}
 
-            {canManage && (
+            {(canManage || user?.role === "customer") && (
                 <form className="form-card" onSubmit={recordPayment}>
                     <h3>Record Payment</h3>
 
