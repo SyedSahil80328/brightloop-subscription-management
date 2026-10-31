@@ -233,6 +233,17 @@ CREATE TABLE IF NOT EXISTS payments (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 17. Password reset tokens
+CREATE TABLE password_reset_tokens (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL
+        REFERENCES users(id) ON DELETE CASCADE,
+    token_hash TEXT NOT NULL UNIQUE,
+    expires_at TIMESTAMPTZ NOT NULL,
+    used_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- =====================================================
 -- INDEXES FOR FREQUENTLY ACCESSED DATA
 -- =====================================================
@@ -260,6 +271,9 @@ CREATE INDEX IF NOT EXISTS idx_invoice_lines_invoice
 
 CREATE INDEX IF NOT EXISTS idx_variants_product
     ON product_variants(product_id);
+
+CREATE INDEX idx_password_reset_tokens_user
+    ON password_reset_tokens(user_id);
 
 -- =====================================================
 -- END OF SCHEMA
