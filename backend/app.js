@@ -15,5 +15,9 @@ app.get("/", (req, res) => {
 });
 
 const authRoutes = require("./routes/authRoutes");
-app.use("/api/auth", authRoutes); 
+app.use("/api/auth", authRoutes);
+const productRoutes = require("./routes/productRoutes");
+app.use("/api/products", productRoutes);
+const variantRoutes = require("./routes/variantRoutes");
+app.use("/api", variantRoutes);
 module.exports = app;
