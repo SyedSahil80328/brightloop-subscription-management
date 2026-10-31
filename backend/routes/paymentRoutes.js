@@ -6,6 +6,6 @@ const { recordPayment, getPayments } =
     require("../controllers/paymentController");
 
 router.get("/", authenticate, getPayments);
-router.post("/", authenticate, authorize("admin", "staff"), recordPayment);
+router.post("/", authenticate, authorize("admin", "staff", "customer"), recordPayment);
 
 module.exports = router;

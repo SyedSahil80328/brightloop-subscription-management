@@ -5,7 +5,9 @@ exports.recordPayment = async (req, res) => {
     const { invoice_id, payment_method, amount, note } = req.body;
 
     if (!invoice_id || !payment_method || !amount || Number(amount) <= 0) {
-        return res.status(400).json({ message: "Valid invoice, payment method and amount are required" });
+        return res.status(400).json({
+            message: "Valid invoice, payment method and amount are required"
+        });
     }
 
     const client = await pool.connect();
@@ -25,12 +27,27 @@ exports.recordPayment = async (req, res) => {
 
         const invoice = result.rows[0];
 
-        if (invoice.status !== "confirmed") {
+        // Customers can only pay their own invoices.
+        if (
+            req.user.role === "customer" &&
+            Number(invoice.customer_id) !== Number(req.user.id)
+        ) {
             await client.query("ROLLBACK");
-            return res.status(400).json({ message: "Only confirmed invoices can receive payments" });
+            return res.status(403).json({
+                message: "You cannot pay another customer's invoice"
+            });
         }
 
-        const outstanding = Number(invoice.total_amount) - Number(invoice.amount_paid);
+        if (invoice.status !== "confirmed") {
+            await client.query("ROLLBACK");
+            return res.status(400).json({
+                message: "Only confirmed invoices can receive payments"
+            });
+        }
+
+        const outstanding =
+            Number(invoice.total_amount) - Number(invoice.amount_paid);
+
         const paymentAmount = Number(amount);
 
         if (paymentAmount > outstanding) {
@@ -46,8 +63,13 @@ exports.recordPayment = async (req, res) => {
             [invoice_id, payment_method, paymentAmount, note || null]
         );
 
-        const newAmountPaid = Number(invoice.amount_paid) + paymentAmount;
-        const newStatus = newAmountPaid >= Number(invoice.total_amount) ? "paid" : "confirmed";
+        const newAmountPaid =
+            Number(invoice.amount_paid) + paymentAmount;
+
+        const newStatus =
+            newAmountPaid >= Number(invoice.total_amount)
+                ? "paid"
+                : "confirmed";
 
         await client.query(
             `UPDATE invoices
@@ -68,7 +90,10 @@ exports.recordPayment = async (req, res) => {
     } catch (error) {
         await client.query("ROLLBACK");
         console.error("Record payment error:", error);
-        res.status(500).json({ message: "Failed to record payment" });
+
+        res.status(500).json({
+            message: "Failed to record payment"
+        });
     } finally {
         client.release();
     }
@@ -103,8 +128,12 @@ exports.getPayments = async (req, res) => {
         const result = await pool.query(query, values);
 
         res.json({ payments: result.rows });
+
     } catch (error) {
         console.error("Get payments error:", error);
-        res.status(500).json({ message: "Failed to fetch payments" });
+
+        res.status(500).json({
+            message: "Failed to fetch payments"
+        });
     }
 };
